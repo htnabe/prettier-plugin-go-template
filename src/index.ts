@@ -1,26 +1,26 @@
 import {
+  ParserOptions,
+  SupportLanguage,
+  Parser,
+  Printer,
   doc,
   FastPath,
-  Parser,
-  ParserOptions,
-  Printer,
-  SupportLanguage,
 } from "prettier";
-import { builders, utils } from "prettier/doc";
+import { utils, builders } from "prettier/doc.js";
 import { parsers as htmlParsers } from "prettier/parser-html";
 import {
-  GoBlock,
-  GoInline,
-  GoInlineEndDelimiter,
-  GoInlineStartDelimiter,
-  GoMultiBlock,
   GoNode,
-  GoRoot,
-  GoUnformattable,
-  isBlock,
-  isMultiBlock,
-  isRoot,
   parseGoTemplate,
+  isRoot,
+  isMultiBlock,
+  GoMultiBlock,
+  GoInline,
+  isBlock,
+  GoInlineStartDelimiter,
+  GoInlineEndDelimiter,
+  GoRoot,
+  GoBlock,
+  GoUnformattable,
 } from "./parse";
 
 const htmlParser = htmlParsers.html;
@@ -75,27 +75,26 @@ export const parsers = {
 };
 export const printers = {
   [PLUGIN_KEY]: <Printer<GoNode>>{
-    print: (path, options: ExtendedParserOptions, print) => {
+    print: (path, printOptions: ExtendedParserOptions, print) => {
       const node = path.getNode();
 
       switch (node?.type) {
         case "inline":
-          return printInline(node, path, options, print);
+          return printInline(node, path, printOptions, print);
         case "double-block":
           return printMultiBlock(node, path, print);
         case "unformattable":
-          return printUnformattable(node, options);
+          return printUnformattable(node, printOptions);
       }
 
       throw new Error(
         `An error occured during printing. Found invalid node ${node?.type}.`,
       );
     },
-    embed: (path, options) => {
+    embed: (path, parserOptions) => {
       try {
-        return embed(path, options);
+        return embed(path, parserOptions);
       } catch (e) {
-        console.error("Formatting failed.", e);
         throw e;
       }
     },
@@ -106,16 +105,16 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
   return async (textToDoc, print, path, optionsA) => {
     const node = path.getNode();
 
-    const options = optionsA as ParserOptions;
+    const parserOptions = optionsA as ParserOptions;
 
     if (!node) {
       return undefined;
     }
 
     if (hasPrettierIgnoreLine(node)) {
-      return options.originalText.substring(
-        options.locStart(node),
-        options.locEnd(node),
+      return parserOptions.originalText.substring(
+        parserOptions.locStart(node),
+        parserOptions.locEnd(node),
       );
     }
 
@@ -124,7 +123,7 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
     }
 
     const html = await textToDoc(node.aliasedContent, {
-      ...options,
+      ...parserOptions,
       parser: "html",
       parentParser: "go-template",
     });
@@ -135,11 +134,11 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
           return currentDoc;
         }
 
-        let result: builders.Doc = currentDoc;
+        let mappedDoc: builders.Doc = currentDoc;
 
         Object.keys(node.children).forEach(
           (key) =>
-            (result = doc.utils.mapDoc(result, (docNode) =>
+            (mappedDoc = doc.utils.mapDoc(mappedDoc, (docNode) =>
               typeof docNode !== "string" || !docNode.includes(key)
                 ? docNode
                 : [
@@ -150,7 +149,7 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
             )),
         );
 
-        return result;
+        return mappedDoc;
       }),
     );
 
@@ -176,7 +175,7 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
     const result = [startStatement, content, builders.softline, endStatement];
 
     const emptyLine =
-      !!node.end && isFollowedByEmptyLine(node.end, options.originalText)
+      !!node.end && isFollowedByEmptyLine(node.end, parserOptions.originalText)
         ? builders.softline
         : "";
 
@@ -186,7 +185,7 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
 
     return builders.group([builders.group(result), emptyLine], {
       shouldBreak:
-        !!node.end && hasNodeLinebreak(node.end, options.originalText),
+        !!node.end && hasNodeLinebreak(node.end, parserOptions.originalText),
     });
   };
 };
@@ -208,7 +207,7 @@ function isFollowedByNode(node: GoInline): boolean {
   let nextNodeIndex = -1;
   Object.keys(parent.children).forEach((key) => {
     const index = parent.aliasedContent.indexOf(key, start);
-    if (nextNodeIndex == -1 || index < nextNodeIndex) {
+    if (nextNodeIndex === -1 || index < nextNodeIndex) {
       nextNodeIndex = index;
     }
   });
@@ -221,24 +220,26 @@ function isFollowedByNode(node: GoInline): boolean {
 function printInline(
   node: GoInline,
   path: FastPath<GoNode>,
-  options: ExtendedParserOptions,
+  parserOptions: ExtendedParserOptions,
   print: PrintFn,
 ): builders.Doc {
   const isBlockNode = isBlockEnd(node) || isBlockStart(node);
   const emptyLine =
-    isFollowedByEmptyLine(node, options.originalText) && isFollowedByNode(node)
+    isFollowedByEmptyLine(node, parserOptions.originalText) &&
+    isFollowedByNode(node)
       ? builders.softline
       : "";
 
   const result: builders.Doc[] = [
-    printStatement(node.statement, options.goTemplateBracketSpacing, {
+    printStatement(node.statement, parserOptions.goTemplateBracketSpacing, {
       start: node.startDelimiter,
       end: node.endDelimiter,
     }),
   ];
 
   return builders.group([...result, emptyLine], {
-    shouldBreak: hasNodeLinebreak(node, options.originalText) && !isBlockNode,
+    shouldBreak:
+      hasNodeLinebreak(node, parserOptions.originalText) && !isBlockNode,
   });
 }
 
@@ -348,10 +349,13 @@ function getFirstBlockParent(node: Exclude<GoNode, GoRoot>): {
 
 function printUnformattable(
   node: GoUnformattable,
-  options: ExtendedParserOptions,
+  targetOpts: ExtendedParserOptions,
 ) {
-  const start = options.originalText.lastIndexOf("\n", node.index - 1);
-  const line = options.originalText.substring(start, node.index + node.length);
+  const start = targetOpts.originalText.lastIndexOf("\n", node.index - 1);
+  const line = targetOpts.originalText.substring(
+    start,
+    node.index + node.length,
+  );
   const lineWithoutAdditionalContent =
     line.replace(node.content, "").match(/\s*$/)?.[0] ?? "";
 
@@ -364,7 +368,7 @@ function printPlainBlock(text: string, hardlines = true): builders.Doc {
   const lines = text.split("\n");
 
   const segments = lines.filter(
-    (value, i) => !(i == 0 || i == lines.length - 1) || !isTextEmpty(value),
+    (value, i) => !(i === 0 || i === lines.length - 1) || !isTextEmpty(value),
   );
 
   return [

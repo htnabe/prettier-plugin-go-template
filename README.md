@@ -1,4 +1,6 @@
 # prettier-plugin-go-template
+![codecov](https://codecov.io/gh/htnabe/prettier-plugin-go-template/branch/main/graph/badge.svg)
+![license](https://img.shields.io/github/license/htnabe/prettier-plugin-go-template)
 
 Formatter plugin for go template files. The only peer dependency is [prettier](https://www.npmjs.com/package/prettier).
 

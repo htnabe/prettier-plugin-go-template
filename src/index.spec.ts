@@ -1,7 +1,7 @@
-import { existsSync, readdirSync, readFileSync } from "fs";
-import { join } from "path";
 import * as prettier from "prettier";
 import * as GoTemplatePlugin from "./index";
+import { readdirSync, readFileSync, existsSync } from "fs";
+import { join } from "path";
 
 const prettify = (
   code: string,
