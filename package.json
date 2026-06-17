@@ -26,16 +26,15 @@
   "types": "lib/index",
   "scripts": {
     "lint": "tslint --project .",
+    "format": "prettier --write .",
     "update:deps": "ncu -u && npm install",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --no-cache",
-    "publish:coverage": "codecov -t $npm_config_prettier_plugin_go_html_codecov",
-    "release:coverage": "npm run coverage && npm run publish:coverage",
-    "build": "tsc --pretty",
     "watch": "npm run build -- --watch",
     "watch:test": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "release:plugin": "npm run build && npm run release:coverage && npm publish",
-    "release:plugin:local": "npm run build && npm run release:coverage && npm publish --registry=http://localhost:4873/"
+    "release:plugin:local": "npm run build && npm run release:coverage && npm publish --registry=http://localhost:4873/",
+    "build": "tsc --pretty"
   },
   "peerDependencies": {
     "prettier": "^3.0.0"
@@ -45,6 +44,7 @@
     "@types/node": "^25.9.3",
     "codecov": "^3.8.3",
     "jest": "^30.4.2",
+    "lefthook": "^2.1.9",
     "npm-check-updates": "^22.2.3",
     "prettier": "^3.8.4",
     "ts-jest": "^29.4.11",
