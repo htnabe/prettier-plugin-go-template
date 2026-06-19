@@ -62,9 +62,9 @@ All subdirectories are **auto-discovered** — no manual registration. A **secon
 
 ## Plugin Option
 
-| Option                     | Type    | Default | Effect                     |
-| -------------------------- | ------- | ------- | -------------------------- |
-| `goTemplateBracketSpacing` | boolean | `true`  | `{{ stmt }}` vs `{{stmt}}` |
+| Option | Type | Default | Effect |
+| ------ | ---- | ------- | ------ |
+| `goTemplateBracketSpacing` | boolean | `true` | `{{ stmt }}` vs `{{stmt}}` |
 
 ## Documentation Upkeep
 
