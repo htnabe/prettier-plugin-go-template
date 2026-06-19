@@ -55,7 +55,7 @@
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "dependencies": {
     "ulid": "^3.0.2"
