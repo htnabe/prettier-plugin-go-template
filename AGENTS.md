@@ -12,12 +12,11 @@ Supported extensions: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.t
 
 Three-file core in [`src/`](src/):
 
-| File                                                       | Role                                                                                                        |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| [`src/parse.ts`](src/parse.ts)                             | Regex parser; builds AST (`GoRoot`, `GoBlock`, `GoInline`, `GoMultiBlock`, `GoUnformattable`) using a stack |
-| [`src/index.ts`](src/index.ts)                             | Prettier plugin entry; printer switch, `embed()` flow, plugin option declaration                            |
-| [`src/create-id-generator.ts`](src/create-id-generator.ts) | ULID factory used to alias Go template nodes during the HTML formatting pass                                |
-
+| File | Role |
+| ---- | ---- |
+| [`src/parse.ts`](src/parse.ts) | Regex parser; builds AST (`GoRoot`, `GoBlock`, `GoInline`, `GoMultiBlock`, `GoUnformattable`) using a stack |
+| [`src/index.ts`](src/index.ts) | Prettier plugin entry; printer switch, `embed()` flow, plugin option declaration |
+| [`src/create-id-generator.ts`](src/create-id-generator.ts) | ULID factory used to alias Go template nodes during the HTML formatting pass |
 **Formatting flow**: `parseGoTemplate()` → AST with aliased child IDs → `embed()` replaces IDs with formatted children → Prettier HTML parser → re-inject → final output.
 
 ## Commands
