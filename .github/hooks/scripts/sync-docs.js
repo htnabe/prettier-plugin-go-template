@@ -31,7 +31,8 @@ process.stdin.on("end", () => {
         }),
       );
     }
-  } catch (_) {
+  } catch (e) {
     // Non-fatal: silently ignore parse errors so normal agent flow is unblocked.
+    console.error("Error in sync-docs hook, but you do not need to worry:", e);
   }
 });
