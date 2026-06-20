@@ -27,12 +27,13 @@ The central regex near the top of the file captures `{{...}}` blocks with option
 
 ## Outdated Tooling — Do Not Auto-Migrate
 
-| Tool | Status | Action |
-| ---- | ------ | ------ |
-| `tslint` | Deprecated upstream | Do not migrate to ESLint unless explicitly requested |
-| `typescript ^6.0.3` | Stable (major v6) | Avoid assumptions about stable API surface |
-| `NODE_OPTIONS=--experimental-vm-modules` | Required workaround | Do not remove from test scripts |
-| `codecov ^3.8.3` | Has deprecation notices | Treat warnings as non-blocking |
+| Tool                                     | Status                  | Action                                                         |
+| ---------------------------------------- | ----------------------- | -------------------------------------------------------------- |
+| `oxlint`                                 | Active and in use       | Keep lint-related docs and scripts aligned with `package.json` |
+| `typescript ^6.0.3`                      | Stable (major v6)       | Avoid assumptions about stable API surface                     |
+| `NODE_OPTIONS=--experimental-vm-modules` | Required workaround     | Do not remove from test scripts                                |
+| `codecov ^3.8.3`                         | Has deprecation notices | Treat warnings as non-blocking                                 |
+
 ## Prettier Ignore Support
 
 Two mechanisms must remain working at all times:

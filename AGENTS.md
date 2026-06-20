@@ -12,11 +12,12 @@ Supported extensions: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.t
 
 Three-file core in [`src/`](src/):
 
-| File | Role |
-| ---- | ---- |
-| [`src/parse.ts`](src/parse.ts) | Regex parser; builds AST (`GoRoot`, `GoBlock`, `GoInline`, `GoMultiBlock`, `GoUnformattable`) using a stack |
-| [`src/index.ts`](src/index.ts) | Prettier plugin entry; printer switch, `embed()` flow, plugin option declaration |
-| [`src/create-id-generator.ts`](src/create-id-generator.ts) | ULID factory used to alias Go template nodes during the HTML formatting pass |
+| File                                                       | Role                                                                                                        |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| [`src/parse.ts`](src/parse.ts)                             | Regex parser; builds AST (`GoRoot`, `GoBlock`, `GoInline`, `GoMultiBlock`, `GoUnformattable`) using a stack |
+| [`src/index.ts`](src/index.ts)                             | Prettier plugin entry; printer switch, `embed()` flow, plugin option declaration                            |
+| [`src/create-id-generator.ts`](src/create-id-generator.ts) | ULID factory used to alias Go template nodes during the HTML formatting pass                                |
+
 **Formatting flow**: `parseGoTemplate()` → AST with aliased child IDs → `embed()` replaces IDs with formatted children → Prettier HTML parser → re-inject → final output.
 
 ## Commands
@@ -25,7 +26,7 @@ Three-file core in [`src/`](src/):
 npm run build       # Compile TypeScript → lib/  (tsc --pretty)
 npm test            # Run all fixture tests  (Jest + ESM flag)
 npm run coverage    # Tests with coverage report
-npm run lint        # tslint --project .
+npm run lint        # oxlint
 npm run format      # prettier --write .
 npm run watch       # Watch-mode TypeScript compile
 npm run watch:test  # Watch-mode Jest
@@ -55,16 +56,16 @@ All subdirectories are **auto-discovered** — no manual registration. A **secon
 
 - **`NODE_OPTIONS=--experimental-vm-modules` is required** — already in npm scripts; do not remove this flag.
 - **Idempotency is enforced**: formatting the output a second time must equal the first result; violations are test failures.
-- **`tslint` is intentionally used** — do not migrate to ESLint unless explicitly asked.
+- **`oxlint` is the standard linter** — keep documentation and scripts aligned with `package.json` lint commands.
 - **`<script>` / `<style>` blocks** containing `{{}}` become `GoUnformattable` nodes and must be preserved byte-for-byte.
 - **Stack-based parser**: unmatched `{{end}}` blocks throw `Error("Missing end block.")` — cover new block types with an error fixture.
 - **`release:coverage` script is undefined** — `release:plugin` will fail at that step; add the script before publishing.
 
 ## Plugin Option
 
-| Option | Type | Default | Effect |
-| ------ | ---- | ------- | ------ |
-| `goTemplateBracketSpacing` | boolean | `true` | `{{ stmt }}` vs `{{stmt}}` |
+| Option                     | Type    | Default | Effect                     |
+| -------------------------- | ------- | ------- | -------------------------- |
+| `goTemplateBracketSpacing` | boolean | `true`  | `{{ stmt }}` vs `{{stmt}}` |
 
 ## Documentation Upkeep
 
