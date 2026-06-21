@@ -2,6 +2,7 @@ import * as prettier from "prettier";
 import * as GoTemplatePlugin from "./index";
 import { readdirSync, readFileSync, existsSync } from "fs";
 import { join } from "path";
+import { jest } from "@jest/globals";
 
 const prettify = (
   code: string,
@@ -13,7 +14,7 @@ const prettify = (
     ...options,
   });
 
-const testFolder = join(__dirname, "tests");
+const testFolder = join(process.cwd(), "src", "tests");
 const tests = readdirSync(testFolder);
 
 describe("format", () => {

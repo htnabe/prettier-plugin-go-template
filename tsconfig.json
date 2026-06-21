@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "types": ["node", "jest"],
+    "types": ["node"],
     "target": "ES2020",
     "lib": ["ESNext"],
-    "module": "node16",
-    "moduleResolution": "node16",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
 
-    "rootDir": "./src",
-    "outDir": "./lib",
     "declaration": true,
-    "removeComments": true,
+    "emitDeclarationOnly": false,
+
     "inlineSourceMap": true,
     "inlineSources": true,
 
@@ -20,11 +20,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
-    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
+
+  "include": ["src"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

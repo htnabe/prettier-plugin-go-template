@@ -51,4 +51,4 @@ Cover both in the relevant fixture tests if you touch ignore-handling code.
 
 ## Documentation Upkeep
 
-After any change to commands, architecture, plugin options, or pitfalls, update [`AGENTS.md`](../../AGENTS.md) before ending your turn.
+After any change to commands, architecture, plugin options, pitfalls, or docs under [`docs/develop`](../../docs/develop) or [`docs/guidance`](../../docs/guidance), update [`AGENTS.md`](../../AGENTS.md) before ending your turn.
