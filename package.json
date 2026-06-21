@@ -21,6 +21,9 @@
   ],
   "type": "module",
   "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",

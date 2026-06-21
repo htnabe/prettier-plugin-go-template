@@ -2,7 +2,7 @@
 
 Publishing is automated from GitHub Actions when a GitHub Release is published.
 
-- Workflow: [.github/workflows/publish.yaml](.github/workflows/publish.yaml)
+- Workflow: [.github/workflows/publish.yaml](../../.github/workflows/publish.yaml)
 - Trigger: release event with type `published`
 - Tag rule: release tag must start with `v` and match `package.json` version after removing the leading `v`
 - Registry: npm (`https://registry.npmjs.org`)
