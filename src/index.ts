@@ -1,24 +1,24 @@
 import {
-  ParserOptions,
-  SupportLanguage,
-  Parser,
-  Printer,
+  type ParserOptions,
+  type SupportLanguage,
+  type Parser,
+  type Printer,
   doc,
-  FastPath,
+  type FastPath,
 } from "prettier";
 import { utils, builders } from "prettier/doc.js";
 import {
-  GoNode,
+  type GoNode,
   parseGoTemplate,
   isRoot,
   isMultiBlock,
-  GoInline,
+  type GoInline,
   isBlock,
-  GoInlineStartDelimiter,
-  GoInlineEndDelimiter,
-  GoRoot,
-  GoBlock,
-  GoUnformattable,
+  type GoInlineStartDelimiter,
+  type GoInlineEndDelimiter,
+  type GoRoot,
+  type GoBlock,
+  type GoUnformattable,
 } from "./parse";
 
 const PLUGIN_KEY = "go-template";

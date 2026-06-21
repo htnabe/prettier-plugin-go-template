@@ -1,4 +1,4 @@
-import { Parser } from "prettier";
+import type { Parser } from "prettier";
 import { createIdGenerator } from "./create-id-generator";
 
 export const parseGoTemplate: Parser<GoNode>["parse"] = (text) => {
