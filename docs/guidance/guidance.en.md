@@ -31,7 +31,8 @@ npm i -D @htnabe/prettier-plugin-go-template@rc && npm uninstall prettier-plugin
 
 Auto-detected: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.tpl`, `.html.tmpl`, `.html.tpl`
 
-For plain `.html` files, keep the override shown above.
+The override is required only when templates use plain `.html`.
+For auto-detected extensions listed above, the override can be omitted.
 
 ### Option
 

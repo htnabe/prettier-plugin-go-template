@@ -31,7 +31,8 @@ npm i -D @htnabe/prettier-plugin-go-template@rc && npm uninstall prettier-plugin
 
 自動検出: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.tpl`, `.html.tmpl`, `.html.tpl`
 
-通常の `.html` は上記 override を設定してください。
+override が必要なのは、テンプレートを通常の `.html` で運用する場合のみです。
+上記の自動検出対象の拡張子では override は不要です。
 
 ### オプション
 
