@@ -8,20 +8,23 @@
       "type": "node",
       "request": "launch",
       "name": "Debug file",
-      "program": "${workspaceRoot}/lib/${fileBasenameNoExtension}.js",
-      "cwd": "${workspaceRoot}",
+      "program": "${workspaceFolder}/lib/${fileBasenameNoExtension}.js",
+      "cwd": "${workspaceFolder}",
       "sourceMaps": true,
       "smartStep": true,
       "preLaunchTask": "build",
-      "outFiles": ["${workspaceRoot}/lib/*.js"]
+      "outFiles": ["${workspaceFolder}/lib/*.js"]
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Debug test",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": [],
-      "cwd": "${workspaceRoot}"
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "args": ["--runInBand"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["--experimental-vm-modules"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }

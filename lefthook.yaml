@@ -2,6 +2,9 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      run: npm run lint
+      glob: "*.{js,ts,jsx,tsx}"
+      run: npx oxlint {staged_files}
     format:
-      run: npm run format
+      glob: "*.{js,ts,jsx,tsx,html,md,json,yaml,yml,css,scss}"
+      run: npx prettier --write {staged_files}
+      stage_fixed: true
