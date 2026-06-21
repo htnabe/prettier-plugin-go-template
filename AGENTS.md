@@ -8,6 +8,13 @@ Supported extensions: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.t
 
 > See [README.md](README.md) for project intent and [CHANGELOG.md](CHANGELOG.md) for version history.
 
+## Documentation
+
+- Developer-facing docs live under [docs/develop](docs/develop).
+- User-facing docs live under [docs/guidance](docs/guidance).
+- Add new docs to the appropriate folder instead of the repository root.
+- Keep this file in sync with any documentation or workflow changes.
+
 ## Architecture
 
 Three-file core in [`src/`](src/):
