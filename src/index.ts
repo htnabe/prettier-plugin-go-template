@@ -5,8 +5,8 @@ import {
   type Printer,
   doc,
   type FastPath,
+  type Doc,
 } from "prettier";
-import { utils, builders } from "prettier/doc.js";
 import {
   type GoNode,
   parseGoTemplate,
@@ -20,6 +20,9 @@ import {
   type GoBlock,
   type GoUnformattable,
 } from "./parse";
+import pkg from "prettier/doc.js";
+
+const { builders, utils } = pkg;
 
 const PLUGIN_KEY = "go-template";
 
@@ -127,7 +130,7 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
           return currentDoc;
         }
 
-        let mappedDoc: builders.Doc = currentDoc;
+        let mappedDoc: Doc = currentDoc;
 
         Object.keys(node.children).forEach(
           (key) =>
@@ -183,9 +186,9 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
   };
 };
 
-type PrintFn = (path: FastPath<GoNode>) => builders.Doc;
+type PrintFn = (path: FastPath<GoNode>) => Doc;
 
-function printMultiBlock(path: FastPath<GoNode>, print: PrintFn): builders.Doc {
+function printMultiBlock(path: FastPath<GoNode>, print: PrintFn): Doc {
   return path.map(print, "blocks");
 }
 
@@ -210,7 +213,7 @@ function printInline(
   node: GoInline,
   path: FastPath<GoNode>,
   parserOptions: ExtendedParserOptions,
-): builders.Doc {
+): Doc {
   const isBlockNode = isBlockEnd(node) || isBlockStart(node);
   const emptyLine =
     isFollowedByEmptyLine(node, parserOptions.originalText) &&
@@ -218,7 +221,7 @@ function printInline(
       ? builders.softline
       : "";
 
-  const result: builders.Doc[] = [
+  const result: Doc[] = [
     printStatement(node.statement, parserOptions.goTemplateBracketSpacing, {
       start: node.startDelimiter,
       end: node.endDelimiter,
@@ -350,7 +353,7 @@ function printUnformattable(
   return printPlainBlock(lineWithoutAdditionalContent + node.content, false);
 }
 
-function printPlainBlock(text: string, hardlines = true): builders.Doc {
+function printPlainBlock(text: string, hardlines = true): Doc {
   const isTextEmpty = (input: string) => !!input.match(/^\s*$/);
 
   const lines = text.split("\n");

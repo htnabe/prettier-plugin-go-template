@@ -1,6 +1,6 @@
 {
   "name": "@htnabe/prettier-plugin-go-template",
-  "version": "0.0.1",
+  "version": "0.0.1-rc.1",
   "description": "Prettier plugin for formatting Go & GoHugo templates.",
   "license": "MIT",
   "repository": {
@@ -30,9 +30,10 @@
     "format": "prettier --write .",
     "update:deps": "ncu -u && npm install",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:runtime": "npm run build && node -e \"import('./dist/index.mjs')\"",
     "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --no-cache",
     "release:coverage": "npm run coverage",
-    "release:plugin": "npm run build && npm run release:coverage && npm publish --provenance --access public",
+    "release:plugin": "npm run test:runtime && npm run release:coverage && npm publish --provenance --access public",
     "watch:test": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "build": "tsdown",
     "build:watch": "tsdown --watch"
@@ -51,6 +52,7 @@
     "lefthook": "^2.1.9",
     "npm-check-updates": "^22.2.3",
     "oxlint": "^1.69.0",
+    "oxlint-tsgolint": "^0.23.0",
     "prettier": "^3.8.4",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",

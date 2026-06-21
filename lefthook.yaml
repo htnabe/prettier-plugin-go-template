@@ -3,8 +3,8 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,ts,jsx,tsx}"
-      run: npx oxlint {staged_files}
+      run: npm run lint {staged_files}
     format:
       glob: "*.{js,ts,jsx,tsx,html,md,json,yaml,yml,css,scss}"
-      run: npx prettier --write {staged_files}
+      run: npm run format {staged_files}
       stage_fixed: true

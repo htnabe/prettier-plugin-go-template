@@ -32,13 +32,14 @@ Three-file core in [`src/`](src/):
 ```bash
 npm run build       # Build plugin artifacts with tsdown → dist/
 npm test            # Run all fixture tests (Jest + ts-jest ESM preset + VM modules flag)
+npm run test:runtime # Build then import dist/index.mjs in plain Node ESM (packaging/runtime smoke test)
 npm run coverage    # Tests with coverage report
 npm run lint        # oxlint
 npm run format      # prettier --write .
 npm run build:watch # Watch-mode build
 npm run watch:test  # Watch-mode Jest
 npm run release:coverage # Coverage-only release helper
-npm run release:plugin   # Build + coverage + npm publish
+npm run release:plugin   # Runtime smoke test + coverage + npm publish
 ```
 
 > **Pre-commit**: `lefthook` runs `lint` + `format` in parallel on every commit. See [lefthook.yaml](lefthook.yaml).  
@@ -68,6 +69,7 @@ All subdirectories are **auto-discovered** — no manual registration. A **secon
 - **`oxlint` is the standard linter** — keep documentation and scripts aligned with `package.json` lint commands.
 - **`<script>` / `<style>` blocks** containing `{{}}` become `GoUnformattable` nodes and must be preserved byte-for-byte.
 - **Stack-based parser**: unmatched `{{end}}` blocks throw `Error("Missing end block.")` — cover new block types with an error fixture.
+- **Consumer runtime differs from Jest runtime**: always run `npm run test:runtime` before release to catch ESM/CJS interop issues in `dist/`.
 
 ## Publishing
 
