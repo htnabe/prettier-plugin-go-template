@@ -1,6 +1,6 @@
 {
-  "name": "prettier-plugin-go-template",
-  "version": "0.0.15",
+  "name": "@htnabe/prettier-plugin-go-template",
+  "version": "0.0.1",
   "description": "Prettier plugin for formatting Go & GoHugo templates.",
   "license": "MIT",
   "repository": {
@@ -19,11 +19,8 @@
     "template",
     "html"
   ],
-  "files": [
-    "lib"
-  ],
-  "main": "lib/index",
-  "types": "lib/index",
+  "type": "module",
+  "types": "./dist/index.d.mts",
   "scripts": {
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
@@ -31,19 +28,22 @@
     "update:deps": "ncu -u && npm install",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --no-cache",
-    "watch": "npm run build -- --watch",
+    "release:coverage": "npm run coverage",
+    "release:plugin": "npm run build && npm run release:coverage && npm publish --provenance --access public",
     "watch:test": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "release:plugin": "npm run build && npm run release:coverage && npm publish",
-    "release:plugin:local": "npm run build && npm run release:coverage && npm publish --registry=http://localhost:4873/",
-    "build": "tsc --pretty"
+    "build": "tsdown",
+    "build:watch": "tsdown --watch"
   },
   "peerDependencies": {
     "prettier": "^3.0.0"
   },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^25.9.3",
-    "codecov": "^3.8.3",
+    "codecov": "^3.8.2",
     "jest": "^30.4.2",
     "lefthook": "^2.1.9",
     "npm-check-updates": "^22.2.3",
@@ -51,13 +51,22 @@
     "prettier": "^3.8.4",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
+    "tsdown": "^0.22.2",
     "tslib": "^2.8.1",
     "typescript": "^6.0.3"
   },
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
   "dependencies": {
     "ulid": "^3.0.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
   }
 }
