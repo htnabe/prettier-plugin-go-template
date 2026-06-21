@@ -1,29 +1,26 @@
 import {
-  ParserOptions,
-  SupportLanguage,
-  Parser,
-  Printer,
+  type ParserOptions,
+  type SupportLanguage,
+  type Parser,
+  type Printer,
   doc,
-  FastPath,
+  type FastPath,
 } from "prettier";
 import { utils, builders } from "prettier/doc.js";
-import { parsers as htmlParsers } from "prettier/parser-html";
 import {
-  GoNode,
+  type GoNode,
   parseGoTemplate,
   isRoot,
   isMultiBlock,
-  GoMultiBlock,
-  GoInline,
+  type GoInline,
   isBlock,
-  GoInlineStartDelimiter,
-  GoInlineEndDelimiter,
-  GoRoot,
-  GoBlock,
-  GoUnformattable,
+  type GoInlineStartDelimiter,
+  type GoInlineEndDelimiter,
+  type GoRoot,
+  type GoBlock,
+  type GoUnformattable,
 } from "./parse";
 
-const htmlParser = htmlParsers.html;
 const PLUGIN_KEY = "go-template";
 
 type ExtendedParserOptions = ParserOptions<GoNode> &
@@ -80,9 +77,9 @@ export const printers = {
 
       switch (node?.type) {
         case "inline":
-          return printInline(node, path, printOptions, print);
+          return printInline(node, path, printOptions);
         case "double-block":
-          return printMultiBlock(node, path, print);
+          return printMultiBlock(path, print);
         case "unformattable":
           return printUnformattable(node, printOptions);
       }
@@ -92,11 +89,7 @@ export const printers = {
       );
     },
     embed: (path, parserOptions) => {
-      try {
-        return embed(path, parserOptions);
-      } catch (e) {
-        throw e;
-      }
+      return embed(path, parserOptions);
     },
   },
 };
@@ -192,12 +185,8 @@ const embed: Exclude<Printer<GoNode>["embed"], undefined> = () => {
 
 type PrintFn = (path: FastPath<GoNode>) => builders.Doc;
 
-function printMultiBlock(
-  node: GoMultiBlock,
-  path: FastPath<GoNode>,
-  print: PrintFn,
-): builders.Doc {
-  return [...path.map(print, "blocks")];
+function printMultiBlock(path: FastPath<GoNode>, print: PrintFn): builders.Doc {
+  return path.map(print, "blocks");
 }
 
 function isFollowedByNode(node: GoInline): boolean {
@@ -221,7 +210,6 @@ function printInline(
   node: GoInline,
   path: FastPath<GoNode>,
   parserOptions: ExtendedParserOptions,
-  print: PrintFn,
 ): builders.Doc {
   const isBlockNode = isBlockEnd(node) || isBlockStart(node);
   const emptyLine =

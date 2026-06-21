@@ -1,0 +1,110 @@
+name: Secure Publish to npm
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.1
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run audit (warn on high)
+        run: npm audit --audit-level=high || true
+
+  publish:
+    needs: verify
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.1
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Install for publish
+        run: npm ci
+
+      - name: Verify tag matches package.json
+        run: |
+          # extract tag name and normalize by removing a leading 'v' if present
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          TAG_VERSION=${TAG_NAME#v}
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "tag=${TAG_NAME} normalized=${TAG_VERSION} package=${PKG_VERSION}"
+          if [ "${TAG_VERSION}" != "${PKG_VERSION}" ]; then
+            echo "Tag (${TAG_NAME}) normalized to (${TAG_VERSION}) does not match package.json version (${PKG_VERSION})"; exit 1
+          fi
+
+      - name: Build for publish
+        run: npm run build
+
+      - name: Verify dist artifacts
+        run: |
+          ls -la dist
+          test -f dist/index.mjs
+          test -f dist/index.d.mts
+
+      - name: Pack (sanity)
+        run: npm pack
+
+      - name: Resolve npm dist-tag
+        id: npm_tag
+        env:
+          NPM_PRERELEASE_DIST_TAG: ${{ vars.NPM_PRERELEASE_DIST_TAG }}
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          NPM_DIST_TAG=latest
+
+          if [[ "${PKG_VERSION}" == *"-"* ]]; then
+            # default prerelease channel is "next", but can be overridden from repository variables
+            NPM_DIST_TAG=${NPM_PRERELEASE_DIST_TAG:-next}
+          fi
+
+          echo "pkg_version=${PKG_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "npm_dist_tag=${NPM_DIST_TAG}" >> "$GITHUB_OUTPUT"
+          echo "Publishing ${PKG_VERSION} with npm dist-tag '${NPM_DIST_TAG}'"
+
+      - name: Publish to npm
+        run: |
+          # Uses npm trusted publishing (OIDC), so no npm token secret is required.
+          npm publish --provenance --access public --tag "${{ steps.npm_tag.outputs.npm_dist_tag }}"
