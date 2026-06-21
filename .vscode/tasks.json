@@ -11,12 +11,6 @@
     },
     {
       "type": "npm",
-      "label": "clean",
-      "script": "clean",
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
       "label": "build",
       "script": "build",
       "group": {
@@ -51,7 +45,13 @@
       "type": "npm",
       "label": "lint",
       "script": "lint",
-      "problemMatcher": ["$eslint-stylish"]
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "label": "lint:fix",
+      "script": "lint:fix",
+      "problemMatcher": []
     }
   ]
 }
