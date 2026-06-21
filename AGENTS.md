@@ -69,6 +69,14 @@ All subdirectories are **auto-discovered** — no manual registration. A **secon
 - **`<script>` / `<style>` blocks** containing `{{}}` become `GoUnformattable` nodes and must be preserved byte-for-byte.
 - **Stack-based parser**: unmatched `{{end}}` blocks throw `Error("Missing end block.")` — cover new block types with an error fixture.
 
+## Publishing
+
+- Release workflow is [.github/workflows/publish.yaml](.github/workflows/publish.yaml).
+- Trigger: GitHub release `published`, gated to `v*` tags that match `package.json` version after removing `v`.
+- Publish target: npm package `@htnabe/prettier-plugin-go-template` with trusted publishing (OIDC).
+- Dist-tags: stable releases use `latest`; prereleases default to `next` and can be overridden with `NPM_PRERELEASE_DIST_TAG` repository variable.
+- GitHub Environment `publish` must exist for the workflow job.
+
 ## Plugin Option
 
 | Option                     | Type    | Default | Effect                     |
