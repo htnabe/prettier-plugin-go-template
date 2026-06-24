@@ -7,20 +7,17 @@ import {
   type FastPath,
   type Doc,
 } from "prettier";
-import {
-  type GoNode,
-  parseGoTemplate,
-  isRoot,
-  isMultiBlock,
-  type GoInline,
-  isBlock,
-  type GoInlineStartDelimiter,
-  type GoInlineEndDelimiter,
-  type GoRoot,
-  type GoBlock,
-  type GoUnformattable,
-} from "./parse";
 import pkg from "prettier/doc.js";
+import { parseGoTemplate, isRoot, isMultiBlock, isBlock } from "@/parse";
+import type {
+  GoNode,
+  GoInline,
+  GoInlineStartDelimiter,
+  GoInlineEndDelimiter,
+  GoRoot,
+  GoBlock,
+  GoUnformattable,
+} from "@/types/ast";
 
 const { builders, utils } = pkg;
 

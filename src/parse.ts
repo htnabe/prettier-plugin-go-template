@@ -1,5 +1,15 @@
 import type { Parser } from "prettier";
-import { createIdGenerator } from "./create-id-generator";
+import { createIdGenerator } from "@/create-id-generator";
+import type {
+  GoNode,
+  GoRoot,
+  GoBlock,
+  GoBlockKeyword,
+  GoInlineStartDelimiter,
+  GoInlineEndDelimiter,
+  GoInline,
+  GoMultiBlock,
+} from "@/types/ast";
 
 export const parseGoTemplate: Parser<GoNode>["parse"] = (text) => {
   const regex =
@@ -182,79 +192,6 @@ function aliasNodeContent(current: GoBlock | GoRoot): string {
 
 function last<T>(array: T[]): T | undefined {
   return array[array.length - 1];
-}
-
-export type GoNode =
-  | GoRoot
-  | GoBlock
-  | GoInline
-  | GoMultiBlock
-  | GoUnformattable;
-
-export type GoBlockKeyword =
-  | "if"
-  | "range"
-  | "block"
-  | "with"
-  | "define"
-  | "else"
-  | "prettier-ignore-start"
-  | "prettier-ignore-end"
-  | "end";
-
-export type GoRoot = { type: "root" } & Omit<
-  GoBlock,
-  | "type"
-  | "keyword"
-  | "parent"
-  | "statement"
-  | "id"
-  | "startDelimiter"
-  | "endDelimiter"
-  | "start"
-  | "end"
->;
-
-export interface GoBaseNode<Type extends string> {
-  id: string;
-  type: Type;
-  index: number;
-  length: number;
-  parent: GoBlock | GoRoot | GoMultiBlock;
-}
-
-export interface GoBlock extends GoBaseNode<"block">, WithDelimiter {
-  keyword: GoBlockKeyword;
-  children: {
-    [id: string]: GoNode;
-  };
-  start: GoInline;
-  end: GoInline | null;
-  content: string;
-  aliasedContent: string;
-  contentStart: number;
-}
-
-export interface GoMultiBlock extends GoBaseNode<"double-block"> {
-  blocks: (GoBlock | GoMultiBlock)[];
-  keyword: GoBlockKeyword;
-}
-
-export type GoSharedDelimiter = "%" | "-" | "";
-export type GoInlineStartDelimiter = "<" | "/*" | GoSharedDelimiter;
-export type GoInlineEndDelimiter = ">" | "*/" | GoSharedDelimiter;
-
-export interface GoUnformattable extends GoBaseNode<"unformattable"> {
-  content: string;
-}
-
-export interface WithDelimiter {
-  startDelimiter: GoInlineStartDelimiter;
-  endDelimiter: GoInlineEndDelimiter;
-}
-
-export interface GoInline extends GoBaseNode<"inline">, WithDelimiter {
-  statement: string;
 }
 
 export function isInline(node: GoNode): node is GoInline {
