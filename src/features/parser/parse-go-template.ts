@@ -1,5 +1,3 @@
-import type { Parser } from "prettier";
-import { createIdGenerator } from "@/create-id-generator";
 import type {
   GoNode,
   GoRoot,
@@ -9,7 +7,12 @@ import type {
   GoInlineEndDelimiter,
   GoInline,
   GoMultiBlock,
-} from "@/types/ast";
+} from "@/types/ast/ast";
+import astGuards from "@/types/ast/ast-guards";
+import { createIdGenerator } from "@/utils/create-id-generator";
+import last from "@/utils/last";
+import type { Parser } from "prettier";
+import { aliasNodeContent } from "@/features/parser/alias-node-content";
 
 export const parseGoTemplate: Parser<GoNode>["parse"] = (text) => {
   const regex =
@@ -93,7 +96,7 @@ export const parseGoTemplate: Parser<GoNode>["parse"] = (text) => {
       }
 
       nodeStack.pop();
-    } else if (isBlock(current) && keyword === "else") {
+    } else if (astGuards.isBlock(current) && keyword === "else") {
       const nextChild: GoBlock = {
         type: "block",
         start: inline,
@@ -111,7 +114,7 @@ export const parseGoTemplate: Parser<GoNode>["parse"] = (text) => {
         endDelimiter,
       };
 
-      if (isMultiBlock(current.parent)) {
+      if (astGuards.isMultiBlock(current.parent)) {
         current.parent.blocks.push(nextChild);
       } else {
         const multiBlock: GoMultiBlock = {
@@ -165,7 +168,7 @@ export const parseGoTemplate: Parser<GoNode>["parse"] = (text) => {
     }
   }
 
-  if (!isRoot(nodeStack.pop()!)) {
+  if (!astGuards.isRoot(nodeStack.pop()!)) {
     throw Error("Missing end block.");
   }
 
@@ -173,43 +176,3 @@ export const parseGoTemplate: Parser<GoNode>["parse"] = (text) => {
 
   return root;
 };
-
-function aliasNodeContent(current: GoBlock | GoRoot): string {
-  let result = current.content;
-
-  Object.entries(current.children)
-    .sort(([_, node1], [__, node2]) => node2.index - node1.index)
-    .forEach(
-      ([id, node]) =>
-        (result =
-          result.substring(0, node.index - current.contentStart) +
-          id +
-          result.substring(node.index + node.length - current.contentStart)),
-    );
-
-  return result;
-}
-
-function last<T>(array: T[]): T | undefined {
-  return array[array.length - 1];
-}
-
-export function isInline(node: GoNode): node is GoInline {
-  return node.type === "inline";
-}
-
-export function isBlock(node: GoNode): node is GoBlock {
-  return node.type === "block";
-}
-
-export function isMultiBlock(node: GoNode): node is GoMultiBlock {
-  return node.type === "double-block";
-}
-
-export function isRoot(node: GoNode): node is GoRoot {
-  return node.type === "root";
-}
-
-export function isUnformattable(node: GoNode): node is GoRoot {
-  return node.type === "unformattable";
-}
