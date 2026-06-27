@@ -17,15 +17,18 @@ Supported extensions: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.t
 
 ## Architecture
 
-Three-file core in [`src/`](src/):
+Modular core under [`src/`](src/):
 
-| File                                                       | Role                                                                                                        |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| [`src/parse.ts`](src/parse.ts)                             | Regex parser; builds AST (`GoRoot`, `GoBlock`, `GoInline`, `GoMultiBlock`, `GoUnformattable`) using a stack |
-| [`src/index.ts`](src/index.ts)                             | Prettier plugin entry; printer switch, `embed()` flow, plugin option declaration                            |
-| [`src/create-id-generator.ts`](src/create-id-generator.ts) | ULID factory used to alias Go template nodes during the HTML formatting pass                                |
+| Path                                            | Role                                                                               |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [`src/index.ts`](src/index.ts)                  | Plugin entrypoint; exports `languages`, `options`, `parsers`, and `printers`       |
+| [`src/config/`](src/config)                     | Plugin constants, language registration, and user option definitions               |
+| [`src/features/parser/`](src/features/parser)   | Parser orchestration (`parsers.ts`) and regex AST builder (`parse-go-template.ts`) |
+| [`src/features/printer/`](src/features/printer) | Printer orchestration (`printers.ts`) and printer helper utilities                 |
+| [`src/types/`](src/types)                       | AST and option types (`src/types/ast/ast.ts`, guards, parser-option interfaces)    |
+| [`src/utils/`](src/utils)                       | Shared utility helpers such as ULID ID generation and collection helpers           |
 
-**Formatting flow**: `parseGoTemplate()` → AST with aliased child IDs → `embed()` replaces IDs with formatted children → Prettier HTML parser → re-inject → final output.
+**Formatting flow**: parser in `src/features/parser/parse-go-template.ts` builds aliased AST → printer `embed()` in `src/features/printer/printers.ts` maps IDs back to formatted children through Prettier HTML → final document output.
 
 ## Commands
 
