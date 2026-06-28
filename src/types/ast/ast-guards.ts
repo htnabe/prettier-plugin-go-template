@@ -1,16 +1,6 @@
-import type {
-  GoBlock,
-  GoInline,
-  GoMultiBlock,
-  GoNode,
-  GoRoot,
-} from "@/types/ast/ast";
+import type { GoBlock, GoMultiBlock, GoNode, GoRoot } from "@/types/ast/ast";
 
 const astGuards = {
-  isInline(node: GoNode): node is GoInline {
-    return node.type === "inline";
-  },
-
   isBlock(node: GoNode): node is GoBlock {
     return node.type === "block";
   },
@@ -21,10 +11,6 @@ const astGuards = {
 
   isRoot(node: GoNode): node is GoRoot {
     return node.type === "root";
-  },
-
-  isUnformattable(node: GoNode): node is GoRoot {
-    return node.type === "unformattable";
   },
 };
 

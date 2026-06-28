@@ -64,8 +64,8 @@ export function printStatement(
     ? statement
         .trim()
         .split("\n")
-        .map((line, _, array) =>
-          array.indexOf(line) === array.length - 1
+        .map((line, index, array) =>
+          index === array.length - 1
             ? [line.trim(), builders.softline]
             : builders.indent([line.trim(), builders.softline]),
         )
