@@ -33,7 +33,7 @@
     "coverage": "vitest run --coverage",
     "test:runtime": "npm run build && node -e \"import('./dist/index.mjs')\"",
     "release:coverage": "npm run coverage",
-    "release:plugin": "npm run test:runtime && npm run release:coverage && npm publish --provenance --access public",
+    "release:plugin": "npm run test:runtime && npm run release:coverage && npm publish --access public",
     "build": "tsdown",
     "build:watch": "tsdown --watch"
   },
