@@ -1,7 +1,8 @@
 ## Publishing
 
-Publishing is performed locally after the release commit has reached `main`.
-Creating a GitHub Release does not publish the package automatically.
+Publishing is performed by GitHub Actions after a version bump reaches `main`.
+Creating a GitHub Release is performed by the same workflow after npm publish
+succeeds.
 
 - Registry: npm (`https://registry.npmjs.org`)
 - Package: `@htnabe/prettier-plugin-go-template`
@@ -22,15 +23,16 @@ npm version 0.0.3 --no-git-tag-version
    - `release/v0.0.3` -> `dev`
    - `dev` -> `main`
 5. Do not push directly to `dev` or `main`. Release changes must reach both branches through PR merges.
-6. After the PRs are merged, verify the release commit on `main` and authenticate to npm locally. Use an interactive login or an environment variable; never commit an npm token or an `.npmrc` containing credentials.
+6. After the PRs are merged, the `Publish Release` workflow runs automatically.
+   It only publishes when the `package.json` version differs from the previous
+   `main` commit, matches `package-lock.json`, and is not already published on
+   npm. Ordinary `main` changes therefore do not create releases.
 
-```bash
-git checkout main
-git pull --ff-only origin main
-npm whoami --registry=https://registry.npmjs.org
-```
+   The workflow uses npm trusted publishing via OIDC. Configure the package's
+   trusted publisher for this repository and `.github/workflows/publish.yaml` on
+   npm before the first automated release.
 
-7. Run the release checks locally before creating a tag or GitHub Release:
+7. Run the release checks locally before merging the release PR:
 
 ```bash
 npm ci
@@ -40,37 +42,14 @@ npm run build
 npm pack --dry-run
 ```
 
-8. Publish the package locally. `release:plugin` runs the runtime build check and coverage before publishing. For a prerelease, add `--tag next` to the publish command.
-
-```bash
-npm run release:plugin
-# npm publish --access public --tag next
-```
-
-9. Verify that npm serves the expected version. Only continue after this succeeds:
-
-```bash
-npm view @htnabe/prettier-plugin-go-template@0.0.3 version
-```
-
-10. Create and push the release tag from the verified `main` commit:
-
-```bash
-git checkout main
-git pull --ff-only origin main
-git tag v0.0.3
-git push origin v0.0.3
-```
-
-11. Publish a GitHub Release for `v0.0.3` after the tag has been pushed:
-
-```bash
-gh release create v0.0.3 --verify-tag --generate-notes
-```
+8. The workflow publishes the package, then creates `v<package.json version>`
+   on the same `main` commit and creates the GitHub Release. Tags are never
+   created before validation and npm publication.
 
 ## Guardrails
 
 - Do not push directly to `dev` or `main` except in an explicit emergency approved by maintainers.
 - Do not delete or move release tags in normal operation. If a release fails after tagging, prefer a follow-up patch release over rewriting tag history.
 - Prefer `gh release create --generate-notes` so release notes are derived from GitHub history instead of hand-maintained text.
-- Do not create or push the tag until local verification and npm publication have succeeded. This keeps failed package publication from requiring tag or release deletion.
+- Do not create or push the tag before npm publication has succeeded. This keeps failed package publication from requiring tag or release deletion.
+- Do not reuse a version that has already been published to npm. Fix the release commit and use a new version when npm publication has succeeded but the package contents are wrong.

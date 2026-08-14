@@ -30,7 +30,7 @@ npm run lint        # oxlint
 npm run format      # prettier --write .
 npm run build:watch # Watch-mode build
 npm run release:coverage # Coverage-only release helper
-npm run release:plugin   # Runtime smoke test + coverage + npm publish
+npm run release:plugin   # Legacy local publish helper; use Publish Release workflow
 ```
 
 > **Pre-commit**: `lefthook` runs `lint` + `format` in parallel on every commit. See [lefthook.yaml](lefthook.yaml).  
@@ -65,8 +65,9 @@ All subdirectories are **auto-discovered** — no manual registration. A **secon
 
 Publishing details are centralized in [docs/develop/publishing.md](docs/develop/publishing.md).
 
-- Publishing is performed locally after verification; GitHub Releases do not trigger npm publishing.
-- Run `npm run release:plugin` only after authenticating to npm locally.
+- Publishing is performed by the `Publish Release` GitHub Actions workflow after a version bump reaches `main`.
+- Configure npm trusted publishing for `.github/workflows/publish.yaml` before the first automated release.
+- Do not run `npm run release:plugin` for normal releases; it remains as a legacy local publish helper.
 
 ## Plugin Option
 

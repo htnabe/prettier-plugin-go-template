@@ -1,0 +1,135 @@
+name: Publish Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - package-lock.json
+      - src/**
+      - tsconfig.json
+      - tsdown.config.ts
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: publish-main
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.release.outputs.should_publish }}
+      package_name: ${{ steps.release.outputs.package_name }}
+      package_version: ${{ steps.release.outputs.package_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Check release guard
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          REF_NAME: ${{ github.ref }}
+        run: |
+          if [[ "$REF_NAME" != "refs/heads/main" ]]; then
+            echo "Publishing is only allowed from main"
+            exit 1
+          fi
+
+          package_name=$(node -p "require('./package.json').name")
+          package_version=$(node -p "require('./package.json').version")
+          lock_version=$(node -p "require('./package-lock.json').packages[''].version")
+
+          if [[ "$package_version" != "$lock_version" ]]; then
+            echo "package.json and package-lock.json versions differ"
+            exit 1
+          fi
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            version_changed=true
+          elif [[ "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            version_changed=true
+          else
+            previous_version=$(git show "$BEFORE_SHA:package.json" | node -e \
+              'let input=""; process.stdin.on("data", chunk => input += chunk).on("end", () => console.log(JSON.parse(input).version))')
+            version_changed=$([[ "$package_version" != "$previous_version" ]] && echo true || echo false)
+          fi
+
+          if [[ "$version_changed" != true ]]; then
+            echo "No package version change; skipping publish"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if npm view "$package_name@$package_version" version >/dev/null 2>&1; then
+            echo "$package_name@$package_version is already published"
+            echo "Do not reuse a published version; create a new version instead."
+            exit 1
+          fi
+
+          echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          echo "package_name=$package_name" >> "$GITHUB_OUTPUT"
+          echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: prepare
+    if: needs.prepare.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Update npm
+        run: npm install --global npm@11
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run release checks
+        run: |
+          npm run lint
+          npm test
+          npm run test:runtime
+          npm pack --dry-run
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+
+      - name: Create tag
+        env:
+          PACKAGE_VERSION: ${{ needs.prepare.outputs.package_version }}
+        run: |
+          tag="v${PACKAGE_VERSION}"
+          git tag "$tag" "$GITHUB_SHA"
+          git push origin "$tag"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_VERSION: ${{ needs.prepare.outputs.package_version }}
+        run: |
+          tag="v${PACKAGE_VERSION}"
+          gh release create "$tag" --verify-tag --generate-notes --title "$tag"
