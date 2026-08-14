@@ -65,7 +65,8 @@ All subdirectories are **auto-discovered** — no manual registration. A **secon
 
 Publishing details are centralized in [docs/develop/publishing.md](docs/develop/publishing.md).
 
-- Workflow file: [.github/workflows/publish.yaml](.github/workflows/publish.yaml)
+- Publishing is performed locally after verification; GitHub Releases do not trigger npm publishing.
+- Run `npm run release:plugin` only after authenticating to npm locally.
 
 ## Plugin Option
 

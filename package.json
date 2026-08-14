@@ -33,7 +33,7 @@
     "coverage": "vitest run --coverage",
     "test:runtime": "npm run build && node -e \"import('./dist/index.mjs')\"",
     "release:coverage": "npm run coverage",
-    "release:plugin": "npm run test:runtime && npm run release:coverage && npm publish --provenance --access public",
+    "release:plugin": "npm run test:runtime && npm run release:coverage && npm publish --access public",
     "build": "tsdown",
     "build:watch": "tsdown --watch"
   },
@@ -44,19 +44,19 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "devDependencies": {
-    "@types/node": "^26.0.0",
-    "@vitest/coverage-v8": "^4.1.9",
-    "codecov": "^3.8.2",
-    "lefthook": "^2.1.9",
-    "npm-check-updates": "^22.2.3",
-    "oxlint": "^1.69.0",
-    "oxlint-tsgolint": "^0.24.0",
-    "prettier": "^3.8.4",
+    "@types/node": "^26.1.2",
+    "@vitest/coverage-v8": "^4.1.10",
+    "codecov": "^3.8.3",
+    "lefthook": "^2.1.10",
+    "npm-check-updates": "^23.0.1",
+    "oxlint": "^1.77.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "prettier": "^3.9.6",
     "ts-node": "^10.9.2",
-    "tsdown": "^0.22.2",
+    "tsdown": "^0.22.14",
     "tslib": "^2.8.1",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "ulid": "^3.0.2"
