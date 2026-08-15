@@ -1,110 +1,141 @@
-name: Secure Publish to npm
+name: Publish Release
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - package-lock.json
+      - src/**
+      - tsconfig.json
+      - tsdown.config.ts
+  workflow_dispatch:
 
 permissions:
-  id-token: write # Required for OIDC
   contents: read
+  id-token: write
 
 concurrency:
-  group: publish-${{ github.ref }}
-  cancel-in-progress: true
+  group: publish-main
+  cancel-in-progress: false
 
 jobs:
-  verify:
+  prepare:
     runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.release.outputs.should_publish }}
+      package_name: ${{ steps.release.outputs.package_name }}
+      package_version: ${{ steps.release.outputs.package_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.22.1
-          cache: "npm"
-          registry-url: "https://registry.npmjs.org"
+          node-version: 22
+          registry-url: https://registry.npmjs.org
 
-      - name: Update npm
-        run: npm install -g npm
+      - name: Check release guard
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          REF_NAME: ${{ github.ref }}
+        run: |
+          if [[ "$REF_NAME" != "refs/heads/main" ]]; then
+            echo "Publishing is only allowed from main"
+            exit 1
+          fi
 
-      - name: Install dependencies
-        run: npm ci
+          package_name=$(node -p "require('./package.json').name")
+          package_version=$(node -p "require('./package.json').version")
+          lock_version=$(node -p "require('./package-lock.json').packages[''].version")
 
-      - name: Run tests
-        run: npm test
+          if [[ "$package_version" != "$lock_version" ]]; then
+            echo "package.json and package-lock.json versions differ"
+            exit 1
+          fi
 
-      - name: Run audit (warn on high)
-        run: npm audit --audit-level=high || true
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            version_changed=true
+          elif [[ "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            version_changed=true
+          else
+            previous_version=$(git show "$BEFORE_SHA:package.json" | node -e \
+              'let input=""; process.stdin.on("data", chunk => input += chunk).on("end", () => console.log(JSON.parse(input).version))')
+            version_changed=$([[ "$package_version" != "$previous_version" ]] && echo true || echo false)
+          fi
+
+          if [[ "$version_changed" != true ]]; then
+            echo "No package version change; skipping publish"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if npm view "$package_name@$package_version" version >/dev/null 2>&1; then
+            echo "$package_name@$package_version is already published"
+            echo "Do not reuse a published version; create a new version instead."
+            exit 1
+          fi
+
+          echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          echo "package_name=$package_name" >> "$GITHUB_OUTPUT"
+          echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
 
   publish:
-    needs: verify
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: prepare
+    if: needs.prepare.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
     environment: publish
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.22.1
-          registry-url: "https://registry.npmjs.org"
-          cache: "npm"
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
 
       - name: Update npm
-        run: npm install -g npm
+        run: npm install --global npm@11
 
-      - name: Install for publish
+      - name: Install dependencies
         run: npm ci
 
-      - name: Verify tag matches package.json
+      - name: Run release checks
         run: |
-          # extract tag name and normalize by removing a leading 'v' if present
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_VERSION=${TAG_NAME#v}
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          echo "tag=${TAG_NAME} normalized=${TAG_VERSION} package=${PKG_VERSION}"
-          if [ "${TAG_VERSION}" != "${PKG_VERSION}" ]; then
-            echo "Tag (${TAG_NAME}) normalized to (${TAG_VERSION}) does not match package.json version (${PKG_VERSION})"; exit 1
-          fi
-
-      - name: Build for publish
-        run: npm run build
-
-      - name: Verify dist artifacts
-        run: |
-          ls -la dist
-          test -f dist/index.mjs
-          test -f dist/index.d.mts
-
-      - name: Pack (sanity)
-        run: npm pack
-
-      - name: Resolve npm dist-tag
-        id: npm_tag
-        env:
-          NPM_PRERELEASE_DIST_TAG: ${{ vars.NPM_PRERELEASE_DIST_TAG }}
-        run: |
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          NPM_DIST_TAG=latest
-
-          if [[ "${PKG_VERSION}" == *"-"* ]]; then
-            # default prerelease channel is "next", but can be overridden from repository variables
-            NPM_DIST_TAG=${NPM_PRERELEASE_DIST_TAG:-next}
-          fi
-
-          echo "pkg_version=${PKG_VERSION}" >> "$GITHUB_OUTPUT"
-          echo "npm_dist_tag=${NPM_DIST_TAG}" >> "$GITHUB_OUTPUT"
-          echo "Publishing ${PKG_VERSION} with npm dist-tag '${NPM_DIST_TAG}'"
+          npm run lint
+          npm test
+          npm run test:runtime
+          npm pack --dry-run
 
       - name: Publish to npm
+        env:
+          PACKAGE_VERSION: ${{ needs.prepare.outputs.package_version }}
         run: |
-          # Uses npm trusted publishing (OIDC), so no npm token secret is required.
-          npm publish --provenance --access public --tag "${{ steps.npm_tag.outputs.npm_dist_tag }}"
+          npm_tag=latest
+          if [[ "$PACKAGE_VERSION" == *-* ]]; then
+            prerelease="${PACKAGE_VERSION#*-}"
+            prerelease="${prerelease%%.*}"
+            case "$prerelease" in
+              beta)
+                npm_tag=beta
+                ;;
+              rc)
+                npm_tag=rc
+                ;;
+              *)
+                npm_tag=next
+                ;;
+            esac
+          fi
+          npm publish --provenance --access public --tag "$npm_tag"

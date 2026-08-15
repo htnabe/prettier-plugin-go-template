@@ -1,66 +1,79 @@
 ## Publishing
 
-Publishing is automated from GitHub Actions when a GitHub Release is published.
+Publishing is performed by GitHub Actions after a version bump reaches `main`.
+Git tags and GitHub Releases are created locally after npm publish succeeds.
 
-- Workflow: [.github/workflows/publish.yaml](../../.github/workflows/publish.yaml)
-- Trigger: release event with type `published`
-- Tag rule: release tag must start with `v` and match `package.json` version after removing the leading `v`
 - Registry: npm (`https://registry.npmjs.org`)
 - Package: `@htnabe/prettier-plugin-go-template`
+- Stable dist-tag: `latest`
+- General prerelease dist-tag: `next`
+- Beta prerelease dist-tag: `beta`
+- Release candidate dist-tag: `rc`
+
+The workflow selects the dist-tag from the first prerelease identifier:
+
+| Version         | Dist-tag |
+| --------------- | -------- |
+| `1.0.0`         | `latest` |
+| `1.1.0-alpha.1` | `next`   |
+| `1.1.0-beta.1`  | `beta`   |
+| `1.1.0-rc.1`    | `rc`     |
+
+Install a specific channel with an explicit tag, for example
+`npm install @htnabe/prettier-plugin-go-template@beta`.
 
 ## Release Procedure
 
-1. Start from a release branch (for example `release/v0.0.1`).
+1. Start from a release branch (for example `release/v0.0.3`).
 2. Update version files without creating a tag:
 
 ```bash
-npm version 0.0.1 --no-git-tag-version
+npm version 0.0.3 --no-git-tag-version
 ```
 
 3. Commit release changes on the release branch.
 4. Create and merge PRs in this order:
-   - `release/v0.0.1` -> `dev`
+   - `release/v0.0.3` -> `dev`
    - `dev` -> `main`
 5. Do not push directly to `dev` or `main`. Release changes must reach both branches through PR merges.
-6. After merge to `main`, verify that `main` already contains the final release workflow changes. The release tag uses the workflow files that exist on the tagged commit.
-7. Create and push the release tag from `main`:
+6. After the PRs are merged, the `Publish Release` workflow runs automatically.
+   It only publishes when the `package.json` version differs from the previous
+   `main` commit, matches `package-lock.json`, and is not already published on
+   npm. Ordinary `main` changes therefore do not create releases.
+
+   The workflow uses npm trusted publishing via OIDC. Configure the package's
+   trusted publisher for this repository and `.github/workflows/publish.yaml` on
+   npm before the first automated release.
+
+7. Run the release checks locally before merging the release PR:
+
+```bash
+npm ci
+npm run lint
+npm test
+npm run build
+npm pack --dry-run
+```
+
+8. After the workflow publishes the package successfully, create and push the
+   release tag locally from the same `main` commit, then create the GitHub
+   Release:
 
 ```bash
 git checkout main
 git pull --ff-only origin main
-git tag v0.0.1
-git push origin v0.0.1
+VERSION=$(node -p "require('./package.json').version")
+git tag "v${VERSION}"
+git push origin "v${VERSION}"
+gh release create "v${VERSION}" --verify-tag --generate-notes --title "v${VERSION}"
 ```
 
-8. Publish a GitHub Release for `v0.0.1` (event type `published`) to trigger npm publish.
-
-```bash
-gh release create v0.0.1 --verify-tag --generate-notes
-```
-
-9. Watch the publish workflow and confirm the npm release succeeds.
+Tags must never be created before validation and npm publication.
 
 ## Guardrails
 
 - Do not push directly to `dev` or `main` except in an explicit emergency approved by maintainers.
 - Do not delete or move release tags in normal operation. If a release fails after tagging, prefer a follow-up patch release over rewriting tag history.
 - Prefer `gh release create --generate-notes` so release notes are derived from GitHub history instead of hand-maintained text.
-- Before tagging, re-check `.github/workflows/publish.yaml` on `main` because GitHub Actions evaluates the workflow from the tagged commit.
-
-## v0.0.1 Retrospective
-
-- The publish workflow failed when `npm install -g npm@latest` resolved to a version incompatible with the pinned Node runtime.
-- Releasing from a tag before the workflow fix was present on `main` required deleting and recreating the release tag, which should be treated as an exception path.
-- Future releases should keep the publish workflow compatible with the pinned Node version before the tag is created.
-
-### Dist-tags
-
-- Stable versions publish with dist-tag `latest`
-- Prerelease versions (for example `0.1.0-beta.1`) publish with dist-tag `next`
-- Optional override: set repository variable `NPM_PRERELEASE_DIST_TAG`
-
-### Required repository setup
-
-1. Create a GitHub Environment named `publish`
-2. Keep workflow permissions that enable trusted publishing (`id-token: write`, `contents: read`)
-3. Ensure npm trusted publishing (OIDC) is configured for this repository/package in npm settings
+- Do not create or push the tag before npm publication has succeeded. This keeps failed package publication from requiring tag or release deletion.
+- Do not reuse a version that has already been published to npm. Fix the release commit and use a new version when npm publication has succeeded but the package contents are wrong.
