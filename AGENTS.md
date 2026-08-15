@@ -66,6 +66,8 @@ All subdirectories are **auto-discovered** — no manual registration. A **secon
 Publishing details are centralized in [docs/develop/publishing.md](docs/develop/publishing.md).
 
 - Publishing is performed by the `Publish Release` GitHub Actions workflow after a version bump reaches `main`.
+- Git tags and GitHub Releases are created locally after the workflow publishes to npm.
+- npm dist-tags are `latest` for stable releases, `beta` for beta prereleases, `rc` for release candidates, and `next` for other prereleases.
 - Configure npm trusted publishing for `.github/workflows/publish.yaml` before the first automated release.
 - Do not run `npm run release:plugin` for normal releases; it remains as a legacy local publish helper.
 

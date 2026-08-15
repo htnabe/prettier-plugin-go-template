@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 concurrency:
@@ -32,6 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -94,6 +95,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -116,20 +119,23 @@ jobs:
           npm pack --dry-run
 
       - name: Publish to npm
-        run: npm publish --provenance --access public
-
-      - name: Create tag
         env:
           PACKAGE_VERSION: ${{ needs.prepare.outputs.package_version }}
         run: |
-          tag="v${PACKAGE_VERSION}"
-          git tag "$tag" "$GITHUB_SHA"
-          git push origin "$tag"
-
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PACKAGE_VERSION: ${{ needs.prepare.outputs.package_version }}
-        run: |
-          tag="v${PACKAGE_VERSION}"
-          gh release create "$tag" --verify-tag --generate-notes --title "$tag"
+          npm_tag=latest
+          if [[ "$PACKAGE_VERSION" == *-* ]]; then
+            prerelease="${PACKAGE_VERSION#*-}"
+            prerelease="${prerelease%%.*}"
+            case "$prerelease" in
+              beta)
+                npm_tag=beta
+                ;;
+              rc)
+                npm_tag=rc
+                ;;
+              *)
+                npm_tag=next
+                ;;
+            esac
+          fi
+          npm publish --provenance --access public --tag "$npm_tag"

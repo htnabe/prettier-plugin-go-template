@@ -1,13 +1,26 @@
 ## Publishing
 
 Publishing is performed by GitHub Actions after a version bump reaches `main`.
-Creating a GitHub Release is performed by the same workflow after npm publish
-succeeds.
+Git tags and GitHub Releases are created locally after npm publish succeeds.
 
 - Registry: npm (`https://registry.npmjs.org`)
 - Package: `@htnabe/prettier-plugin-go-template`
 - Stable dist-tag: `latest`
-- Prerelease dist-tag: `next`
+- General prerelease dist-tag: `next`
+- Beta prerelease dist-tag: `beta`
+- Release candidate dist-tag: `rc`
+
+The workflow selects the dist-tag from the first prerelease identifier:
+
+| Version         | Dist-tag |
+| --------------- | -------- |
+| `1.0.0`         | `latest` |
+| `1.1.0-alpha.1` | `next`   |
+| `1.1.0-beta.1`  | `beta`   |
+| `1.1.0-rc.1`    | `rc`     |
+
+Install a specific channel with an explicit tag, for example
+`npm install @htnabe/prettier-plugin-go-template@beta`.
 
 ## Release Procedure
 
@@ -42,9 +55,20 @@ npm run build
 npm pack --dry-run
 ```
 
-8. The workflow publishes the package, then creates `v<package.json version>`
-   on the same `main` commit and creates the GitHub Release. Tags are never
-   created before validation and npm publication.
+8. After the workflow publishes the package successfully, create and push the
+   release tag locally from the same `main` commit, then create the GitHub
+   Release:
+
+```bash
+git checkout main
+git pull --ff-only origin main
+VERSION=$(node -p "require('./package.json').version")
+git tag "v${VERSION}"
+git push origin "v${VERSION}"
+gh release create "v${VERSION}" --verify-tag --generate-notes --title "v${VERSION}"
+```
+
+Tags must never be created before validation and npm publication.
 
 ## Guardrails
 
