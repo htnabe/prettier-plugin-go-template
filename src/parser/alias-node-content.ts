@@ -4,7 +4,7 @@ export function aliasNodeContent(current: GoBlock | GoRoot): string {
   let result = current.content;
 
   Object.entries(current.children)
-    .sort(([_, node1], [__, node2]) => node2.index - node1.index)
+    .sort((entry1, entry2) => entry2[1].index - entry1[1].index)
     .forEach(
       ([id, node]) =>
         (result =

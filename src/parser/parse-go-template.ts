@@ -12,8 +12,8 @@ import astGuards from "@/types/ast/ast-guards";
 import { createIdGenerator } from "@/utils/create-id-generator";
 import last from "@/utils/last";
 import type { Parser } from "prettier";
-import { aliasNodeContent } from "@/features/parser/alias-node-content";
-import { isValidStatement } from "@/features/parser/is-valid-statement";
+import { aliasNodeContent } from "@/parser/alias-node-content";
+import { isValidStatement } from "@/parser/is-valid-statement";
 
 export const parseGoTemplate: Parser<GoNode>["parse"] = (text) => {
   // Delimiter and keyword pieces
