@@ -18,6 +18,7 @@ Supported extensions: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.t
 ## Architecture
 
 Architecture and project structure details are centralized in [docs/develop/structure.md](docs/develop/structure.md).
+Core source folders under `src/` are `config/`, `parser/`, `printer/`, `types/`, `utils/`, and `tests/`; `src/index.ts` remains the plugin entrypoint.
 
 ## Commands
 

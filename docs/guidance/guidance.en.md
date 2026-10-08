@@ -8,7 +8,7 @@ Single-page guide for setup, migration, examples, and ignore rules.
 
 ```bash
 npm i -D prettier
-npm i -D @htnabe/prettier-plugin-go-template && npm uninstall prettier-plugin-go-template
+npm i -D @htnabe/prettier-plugin-go-template
 ```
 
 ### .prettierrc.json
@@ -18,7 +18,7 @@ npm i -D @htnabe/prettier-plugin-go-template && npm uninstall prettier-plugin-go
   "plugins": ["@htnabe/prettier-plugin-go-template"],
   "overrides": [
     {
-      "files": ["*.html"],
+      "files": ["**/*.html"],
       "options": {
         "parser": "go-template"
       }
@@ -45,9 +45,8 @@ For auto-detected extensions listed above, the override can be omitted.
 
 From `prettier-plugin-go-template` to `@htnabe/prettier-plugin-go-template`:
 
-1. `npm uninstall prettier-plugin-go-template`
-2. `npm i -D @htnabe/prettier-plugin-go-template`
-3. Update `.prettierrc.json` plugin name:
+1. `npm uninstall prettier-plugin-go-template && npm i -D @htnabe/prettier-plugin-go-template`
+2. Update `.prettierrc.json` plugin name:
 
 ```json
 {
@@ -57,14 +56,14 @@ From `prettier-plugin-go-template` to `@htnabe/prettier-plugin-go-template`:
 
 ## Ignore Rules
 
-### Single block
+Single block
 
 ```html
 <!-- prettier-ignore -->
 {{ if someCondition }} {{ somethingUnformatted }} {{ end }}
 ```
 
-### Multi-line block
+Multi-line block
 
 ```html
 {{/* prettier-ignore-start */}} ... {{/* prettier-ignore-end */}}
@@ -78,7 +77,7 @@ Template syntax inside `<script>` and `<style>` is preserved.
 
 ## Example
 
-### Before
+Before
 
 ```html
 {{if or .Prev .Next}} {{$p := where site.Pages}}
@@ -90,7 +89,7 @@ Template syntax inside `<script>` and `<style>` is preserved.
 {{end}}
 ```
 
-### After
+After
 
 ```html
 {{ if or .Prev .Next }} {{ $p := where site.Pages }}

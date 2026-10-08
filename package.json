@@ -1,6 +1,6 @@
 {
   "name": "@htnabe/prettier-plugin-go-template",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Prettier plugin for formatting Go & GoHugo templates.",
   "license": "MIT",
   "repository": {
@@ -44,19 +44,19 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@types/node": "^26.5.1",
+    "@vitest/coverage-v8": "^5.0.0",
     "codecov": "^3.8.3",
-    "lefthook": "^2.1.10",
-    "npm-check-updates": "^23.0.2",
-    "oxlint": "^1.79.0",
+    "lefthook": "^2.1.12",
+    "npm-check-updates": "^23.1.0",
+    "oxlint": "^1.82.0",
     "oxlint-tsgolint": "^7.0.2001",
     "prettier": "^3.9.6",
     "ts-node": "^10.9.2",
-    "tsdown": "^0.22.14",
+    "tsdown": "^0.23.0",
     "tslib": "^2.8.1",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "dependencies": {
     "ulid": "^3.0.2"
