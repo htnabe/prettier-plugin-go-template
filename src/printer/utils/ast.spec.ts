@@ -3,7 +3,7 @@ import {
   getFirstBlockParent,
   isBlockEnd,
   isBlockStart,
-} from "@/features/printer/utils/ast";
+} from "@/printer/utils/ast";
 
 describe("getFirstBlockParent", () => {
   it("should return the parent node if it is a block", () => {

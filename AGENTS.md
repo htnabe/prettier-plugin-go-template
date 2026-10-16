@@ -6,6 +6,10 @@ Prettier plugin that formats Hugo/Go template files. Peer dependency: `prettier 
 
 Supported extensions: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.tpl`, `.html.tmpl`, `.html.tpl`.
 
+Requires Node.js 26.0.0 or later. Use the latest Node.js 26.x patch release for
+development and publishing; the dev container also uses Node.js 26.
+Node.js 20, 22, and 24 are no longer supported.
+
 > See [README.md](README.md) for project intent.
 
 ## Documentation
@@ -18,6 +22,7 @@ Supported extensions: `.go.html`, `.gohtml`, `.gotmpl`, `.go.tmpl`, `.tmpl`, `.t
 ## Architecture
 
 Architecture and project structure details are centralized in [docs/develop/structure.md](docs/develop/structure.md).
+Core source folders under `src/` are `config/`, `parser/`, `printer/`, `types/`, `utils/`, and `tests/`; `src/index.ts` remains the plugin entrypoint.
 
 ## Commands
 
@@ -34,7 +39,7 @@ npm run release:plugin   # Legacy local publish helper; use Publish Release work
 ```
 
 > **Pre-commit**: `lefthook` runs `lint` + `format` in parallel on every commit. See [lefthook.yaml](lefthook.yaml).  
-> **CI**: `npm ci && npm test` on PRs to `main`/`dev`. See [.github/workflows/test.yaml](.github/workflows/test.yaml).
+> **CI**: Node.js `26.0.0` and `26.x` on PRs to `main`/`dev`, running `npm ci`, `npm run lint`, `npm run coverage`, and `npm run test:runtime`. Coverage is uploaded only from `26.x`. See [.github/workflows/test.yaml](.github/workflows/test.yaml).
 
 ## Testing
 

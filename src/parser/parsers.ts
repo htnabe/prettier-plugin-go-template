@@ -1,7 +1,7 @@
 import type { GoNode } from "@/types/ast/ast";
 import constants from "@/config/constants";
 import type { Parser } from "prettier";
-import { parseGoTemplate } from "@/features/parser/parse-go-template";
+import { parseGoTemplate } from "@/parser/parse-go-template";
 
 const parsers = {
   [constants.PLUGIN_KEY]: <Parser<GoNode>>{

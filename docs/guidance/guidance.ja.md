@@ -4,11 +4,16 @@
 
 ## セットアップ
 
+### 動作要件
+
+Node.js 26.0.0 以上と Prettier 3 が必要です。
+Node.js 20、22、24 はサポート対象外です。
+
 ### インストール
 
 ```bash
 npm i -D prettier
-npm i -D @htnabe/prettier-plugin-go-template && npm uninstall prettier-plugin-go-template
+npm i -D @htnabe/prettier-plugin-go-template
 ```
 
 ### .prettierrc.json
@@ -18,7 +23,7 @@ npm i -D @htnabe/prettier-plugin-go-template && npm uninstall prettier-plugin-go
   "plugins": ["@htnabe/prettier-plugin-go-template"],
   "overrides": [
     {
-      "files": ["*.html"],
+      "files": ["**/*.html"],
       "options": {
         "parser": "go-template"
       }
@@ -45,9 +50,8 @@ override が必要なのは、テンプレートを通常の `.html` で運用�
 
 `prettier-plugin-go-template` から `@htnabe/prettier-plugin-go-template` へ:
 
-1. `npm uninstall prettier-plugin-go-template`
-2. `npm i -D @htnabe/prettier-plugin-go-template`
-3. `.prettierrc.json` の plugin 名を更新:
+1. `npm uninstall prettier-plugin-go-template && npm i -D @htnabe/prettier-plugin-go-template`
+1. `.prettierrc.json` の plugin 名を更新:
 
 ```json
 {
@@ -57,14 +61,14 @@ override が必要なのは、テンプレートを通常の `.html` で運用�
 
 ## 無視ルール
 
-### 単一ブロック
+単一ブロック
 
 ```html
 <!-- prettier-ignore -->
 {{ if someCondition }} {{ somethingUnformatted }} {{ end }}
 ```
 
-### 複数行
+複数行
 
 ```html
 {{/* prettier-ignore-start */}} ... {{/* prettier-ignore-end */}}
@@ -78,7 +82,7 @@ override が必要なのは、テンプレートを通常の `.html` で運用�
 
 ## 例
 
-### Before
+Before
 
 ```html
 {{if or .Prev .Next}} {{$p := where site.Pages}}
@@ -90,7 +94,7 @@ override が必要なのは、テンプレートを通常の `.html` で運用�
 {{end}}
 ```
 
-### After
+After
 
 ```html
 {{ if or .Prev .Next }} {{ $p := where site.Pages }}
