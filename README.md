@@ -8,6 +8,7 @@
 A Prettier plugin for formatting Go and Hugo template files with comprehensive support for template syntax and intelligent HTML formatting.
 
 - **Package**: `@htnabe/prettier-plugin-go-template`
+- **Requirements**: Node.js 26.0.0 or later and Prettier 3.
 
 ## Quick Start
 

@@ -4,6 +4,11 @@ Single-page guide for setup, migration, examples, and ignore rules.
 
 ## Setup
 
+### Requirements
+
+Node.js 26.0.0 or later and Prettier 3 are required.
+Node.js 20, 22, and 24 are no longer supported.
+
 ### Install
 
 ```bash
