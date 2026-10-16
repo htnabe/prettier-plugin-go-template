@@ -3,6 +3,10 @@
 Publishing is performed by GitHub Actions after a version bump reaches `main`.
 Git tags and GitHub Releases are created locally after npm publish succeeds.
 
+Use the latest Node.js 26.x patch release for development and local release
+checks, matching the Node.js version used by both publishing workflow jobs.
+The package requires Node.js 26.0.0 or later.
+
 - Registry: npm (`https://registry.npmjs.org`)
 - Package: `@htnabe/prettier-plugin-go-template`
 - Stable dist-tag: `latest`
