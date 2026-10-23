@@ -11,7 +11,7 @@ updates:
     schedule:
       interval: weekly
     target-branch: "dev"
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: weekly

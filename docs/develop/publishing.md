@@ -6,6 +6,9 @@ Git tags and GitHub Releases are created locally after npm publish succeeds.
 Use the latest Node.js 26.x patch release for development and local release
 checks, matching the Node.js version used by both publishing workflow jobs.
 The package requires Node.js 26.0.0 or later.
+Use Bun at the version pinned in `package.json` for dependencies and package
+scripts. npm is retained only for registry queries, package inspection, and
+publishing with OIDC/provenance (including updating the publishing CLI).
 
 - Registry: npm (`https://registry.npmjs.org`)
 - Package: `@htnabe/prettier-plugin-go-template`
@@ -24,15 +27,15 @@ The workflow selects the dist-tag from the first prerelease identifier:
 | `1.1.0-rc.1`    | `rc`     |
 
 Install a specific channel with an explicit tag, for example
-`npm install @htnabe/prettier-plugin-go-template@beta`.
+`bun add -d @htnabe/prettier-plugin-go-template@beta`.
 
 ## Release Procedure
 
 1. Start from a release branch (for example `release/v0.0.3`).
-2. Update version files without creating a tag:
+2. Update the package version without creating a tag:
 
 ```bash
-npm version 0.0.3 --no-git-tag-version
+bun pm version 0.0.3 --no-git-tag-version
 ```
 
 3. Commit release changes on the release branch.
@@ -42,8 +45,10 @@ npm version 0.0.3 --no-git-tag-version
 5. Do not push directly to `dev` or `main`. Release changes must reach both branches through PR merges.
 6. After the PRs are merged, the `Publish Release` workflow runs automatically.
    It only publishes when the `package.json` version differs from the previous
-   `main` commit, matches `package-lock.json`, and is not already published on
-   npm. Ordinary `main` changes therefore do not create releases.
+   `main` commit and is not already published on npm. Ordinary `main` changes
+   therefore do not create releases. The publish job installs dependencies with
+   `bun install --frozen-lockfile` to verify that `bun.lock` matches the manifest.
+   Unlike `package-lock.json`, `bun.lock` does not record the root package version.
 
    The workflow uses npm trusted publishing via OIDC. Configure the package's
    trusted publisher for this repository and `.github/workflows/publish.yaml` on
@@ -52,10 +57,10 @@ npm version 0.0.3 --no-git-tag-version
 7. Run the release checks locally before merging the release PR:
 
 ```bash
-npm ci
-npm run lint
-npm test
-npm run build
+bun install --frozen-lockfile
+bun run lint
+bun run test
+bun run test:runtime
 npm pack --dry-run
 ```
 

@@ -1,0 +1,4 @@
+[install]
+ignoreScripts = true
+# Preserve the seven-day release-age policy used by npm.
+minimumReleaseAge = 604800
