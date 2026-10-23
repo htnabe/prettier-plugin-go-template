@@ -1,6 +1,6 @@
 {
   "name": "@htnabe/prettier-plugin-go-template",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Prettier plugin for formatting Go & GoHugo templates.",
   "license": "MIT",
   "repository": {
@@ -20,6 +20,7 @@
     "html"
   ],
   "type": "module",
+  "packageManager": "bun@1.4.4",
   "types": "./dist/index.d.mts",
   "files": [
     "dist"
@@ -28,12 +29,12 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "prettier --write .",
-    "update:deps": "ncu -u && npm install",
+    "update:deps": "ncu -u && bun install",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "test:runtime": "npm run build && node -e \"import('./dist/index.mjs')\"",
-    "release:coverage": "npm run coverage",
-    "release:plugin": "npm run test:runtime && npm run release:coverage && npm publish --access public",
+    "test:runtime": "bun run build && node -e \"import('./dist/index.mjs')\"",
+    "release:coverage": "bun run coverage",
+    "release:plugin": "bun run test:runtime && bun run release:coverage && npm publish --access public",
     "build": "tsdown",
     "build:watch": "tsdown --watch"
   },
