@@ -5,14 +5,14 @@
   "tasks": [
     {
       "label": "Run current file",
-      "command": "ts-node ${relativeFile}",
+      "command": "bun run ts-node ${relativeFile}",
       "type": "shell",
       "problemMatcher": []
     },
     {
-      "type": "npm",
+      "type": "shell",
       "label": "build",
-      "script": "build",
+      "command": "bun run build",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -20,21 +20,21 @@
       "problemMatcher": []
     },
     {
-      "type": "npm",
+      "type": "shell",
       "label": "format",
-      "script": "format",
+      "command": "bun run format",
       "problemMatcher": []
     },
     {
-      "type": "npm",
+      "type": "shell",
       "label": "coverage",
-      "script": "coverage",
+      "command": "bun run coverage",
       "problemMatcher": []
     },
     {
-      "type": "npm",
+      "type": "shell",
       "label": "test",
-      "script": "test",
+      "command": "bun run test",
       "group": {
         "kind": "test",
         "isDefault": true
@@ -42,15 +42,15 @@
       "problemMatcher": []
     },
     {
-      "type": "npm",
+      "type": "shell",
       "label": "lint",
-      "script": "lint",
+      "command": "bun run lint",
       "problemMatcher": []
     },
     {
-      "type": "npm",
+      "type": "shell",
       "label": "lint:fix",
-      "script": "lint:fix",
+      "command": "bun run lint:fix",
       "problemMatcher": []
     }
   ]

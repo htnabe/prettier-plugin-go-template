@@ -12,8 +12,8 @@ Node.js 20、22、24 はサポート対象外です。
 ### インストール
 
 ```bash
-npm i -D prettier
-npm i -D @htnabe/prettier-plugin-go-template
+bun add -d prettier
+bun add -d @htnabe/prettier-plugin-go-template
 ```
 
 ### .prettierrc.json
@@ -50,7 +50,7 @@ override が必要なのは、テンプレートを通常の `.html` で運用�
 
 `prettier-plugin-go-template` から `@htnabe/prettier-plugin-go-template` へ:
 
-1. `npm uninstall prettier-plugin-go-template && npm i -D @htnabe/prettier-plugin-go-template`
+1. `bun remove prettier-plugin-go-template && bun add -d @htnabe/prettier-plugin-go-template`
 1. `.prettierrc.json` の plugin 名を更新:
 
 ```json

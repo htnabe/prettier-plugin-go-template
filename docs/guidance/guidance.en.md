@@ -12,8 +12,8 @@ Node.js 20, 22, and 24 are no longer supported.
 ### Install
 
 ```bash
-npm i -D prettier
-npm i -D @htnabe/prettier-plugin-go-template
+bun add -d prettier
+bun add -d @htnabe/prettier-plugin-go-template
 ```
 
 ### .prettierrc.json
@@ -50,7 +50,7 @@ For auto-detected extensions listed above, the override can be omitted.
 
 From `prettier-plugin-go-template` to `@htnabe/prettier-plugin-go-template`:
 
-1. `npm uninstall prettier-plugin-go-template && npm i -D @htnabe/prettier-plugin-go-template`
+1. `bun remove prettier-plugin-go-template && bun add -d @htnabe/prettier-plugin-go-template`
 2. Update `.prettierrc.json` plugin name:
 
 ```json

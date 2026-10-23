@@ -7,7 +7,7 @@ description: "Use when: maintaining, debugging, or extending the parser, AST typ
 
 ## Compatibility-First Policy
 
-- Run `npm test` after every change. All existing fixtures must pass before adding or changing anything.
+- Run `bun run test` after every change (Vitest, not `bun test`). All existing fixtures must pass before adding or changing anything.
 - Do not remove or rename AST node types or type guards (`isInline()`, `isBlock()`, etc.) without updating every reference in both `parse.ts` and `index.ts`.
 - Do not change the node aliasing scheme (ULID IDs in `aliasNodeContent`) without tracing every downstream reference in the `embed()` function.
 

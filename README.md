@@ -21,6 +21,15 @@ See guidance docs:
 
 ## For Developers
 
+Use Bun (version pinned in `package.json`) for package management and scripts,
+alongside the latest Node.js 26.x patch release:
+
+```bash
+bun install --frozen-lockfile
+bun run test
+bun run build
+```
+
 See [AGENTS.md](AGENTS.md) for architecture, commands, and project structure.
 
 See [docs/develop](docs/develop) for development documentation.

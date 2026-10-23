@@ -10,6 +10,15 @@ Requires Node.js 26.0.0 or later. Use the latest Node.js 26.x patch release for
 development and publishing; the dev container also uses Node.js 26.
 Node.js 20, 22, and 24 are no longer supported.
 
+Use Bun for dependency management and package scripts, with the version pinned in
+`package.json` (`packageManager`). The dev container installs the same Bun version.
+Commit `bun.lock`; do not generate npm, Yarn, or pnpm lockfiles.
+Run `bun install --frozen-lockfile` for setup and CI, or `bun install` after
+dependency changes. `bunfig.toml` disables install lifecycle scripts and enforces
+a seven-day minimum release age for newly resolved packages.
+Keep Node.js for executing development tools and verifying consumer compatibility;
+Bun is the package manager, not a replacement test runner.
+
 > See [README.md](README.md) for project intent.
 
 ## Documentation
@@ -27,19 +36,19 @@ Core source folders under `src/` are `config/`, `parser/`, `printer/`, `types/`,
 ## Commands
 
 ```bash
-npm run build       # Build plugin artifacts with tsdown → dist/
-npm test            # Run all fixture tests (Vitest)
-npm run test:runtime # Build then import dist/index.mjs in plain Node ESM (packaging/runtime smoke test)
-npm run coverage    # Tests with coverage report
-npm run lint        # oxlint
-npm run format      # prettier --write .
-npm run build:watch # Watch-mode build
-npm run release:coverage # Coverage-only release helper
-npm run release:plugin   # Legacy local publish helper; use Publish Release workflow
+bun run build       # Build plugin artifacts with tsdown → dist/
+bun run test        # Run all fixture tests (Vitest, not bun test)
+bun run test:runtime # Build then import dist/index.mjs in plain Node ESM (packaging/runtime smoke test)
+bun run coverage    # Tests with coverage report
+bun run lint        # oxlint
+bun run format      # prettier --write .
+bun run build:watch # Watch-mode build
+bun run release:coverage # Coverage-only release helper
+bun run release:plugin   # Legacy local publish helper; use Publish Release workflow
 ```
 
 > **Pre-commit**: `lefthook` runs `lint` + `format` in parallel on every commit. See [lefthook.yaml](lefthook.yaml).  
-> **CI**: Node.js `26.0.0` and `26.x` on PRs to `main`/`dev`, running `npm ci`, `npm run lint`, `npm run coverage`, and `npm run test:runtime`. Coverage is uploaded only from `26.x`. See [.github/workflows/test.yaml](.github/workflows/test.yaml).
+> **CI**: Node.js `26.0.0` and `26.x` on PRs to `main`/`dev`, with Bun pinned by `package.json`, running `bun install --frozen-lockfile`, `bun run lint`, `bun run coverage`, and `bun run test:runtime`. Coverage is uploaded only from `26.x`. See [.github/workflows/test.yaml](.github/workflows/test.yaml).
 
 ## Testing
 
@@ -56,7 +65,7 @@ src/tests/<test-name>/
 
 All subdirectories are **auto-discovered** — no manual registration. A **second format pass** is always run; it must produce identical output (idempotency check).
 
-**To add a test**: create the folder with `input.html` and `expected.html`, then `npm test`.
+**To add a test**: create the folder with `input.html` and `expected.html`, then `bun run test`.
 
 ## Key Pitfalls
 
@@ -64,7 +73,7 @@ All subdirectories are **auto-discovered** — no manual registration. A **secon
 - **`oxlint` is the standard linter** — keep documentation and scripts aligned with `package.json` lint commands.
 - **`<script>` / `<style>` blocks** containing `{{}}` become `GoUnformattable` nodes and must be preserved byte-for-byte.
 - **Stack-based parser**: unmatched `{{end}}` blocks throw `Error("Missing end block.")` — cover new block types with an error fixture.
-- **Consumer runtime differs from test runtime**: always run `npm run test:runtime` before release to catch ESM/CJS interop issues in `dist/`.
+- **Consumer runtime differs from test runtime**: always run `bun run test:runtime` before release to catch ESM/CJS interop issues in `dist/`.
 
 ## Publishing
 
@@ -74,7 +83,8 @@ Publishing details are centralized in [docs/develop/publishing.md](docs/develop/
 - Git tags and GitHub Releases are created locally after the workflow publishes to npm.
 - npm dist-tags are `latest` for stable releases, `beta` for beta prereleases, `rc` for release candidates, and `next` for other prereleases.
 - Configure npm trusted publishing for `.github/workflows/publish.yaml` before the first automated release.
-- Do not run `npm run release:plugin` for normal releases; it remains as a legacy local publish helper.
+- npm CLI usage is limited to release operations (`npm view`, `npm pack`, `npm publish`, and updating the publishing CLI). Keep npm for trusted publishing with OIDC and provenance.
+- Do not run `bun run release:plugin` for normal releases; it remains as a legacy local publish helper.
 
 ## Plugin Option
 
